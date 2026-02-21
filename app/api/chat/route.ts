@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 export const runtime = "edge";
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
   try {
@@ -10,7 +20,7 @@ export async function POST(req: Request) {
     if (!message || typeof message !== "string") {
       return NextResponse.json(
         { error: "Missing 'message'." },
-        { status: 400 },
+        { status: 400, headers: corsHeaders },
       );
     }
 
@@ -21,13 +31,13 @@ export async function POST(req: Request) {
     if (!supabaseUrl || !supabaseAnonKey) {
       return NextResponse.json(
         { error: "Missing Supabase env vars" },
-        { status: 500 },
+        { status: 500, headers: corsHeaders },
       );
     }
     if (!groqKey) {
       return NextResponse.json(
         { error: "Missing GROQ_API_KEY" },
-        { status: 500 },
+        { status: 500, headers: corsHeaders },
       );
     }
 
@@ -84,7 +94,7 @@ export async function POST(req: Request) {
           error: "Supabase essentials query failed",
           details: essentialsRes.error.message,
         },
-        { status: 500 },
+        { status: 500, headers: corsHeaders },
       );
     }
     if (searchRes.error) {
@@ -93,7 +103,7 @@ export async function POST(req: Request) {
           error: "Supabase search query failed",
           details: searchRes.error.message,
         },
-        { status: 500 },
+        { status: 500, headers: corsHeaders },
       );
     }
 
@@ -195,7 +205,7 @@ Projects rule:
       const errText = await resp.text();
       return NextResponse.json(
         { error: "Groq request failed", details: errText },
-        { status: 500 },
+        { status: 500, headers: corsHeaders },
       );
     }
 
@@ -204,11 +214,11 @@ Projects rule:
       out?.choices?.[0]?.message?.content ??
       "I don't know based on my portfolio content.";
 
-    return NextResponse.json({ response: answer });
+    return NextResponse.json({ response: answer }, { headers: corsHeaders });
   } catch (e: any) {
     return NextResponse.json(
       { error: "Server error", details: e?.message ?? String(e) },
-      { status: 500 },
+      { status: 500, headers: corsHeaders },
     );
   }
 }
