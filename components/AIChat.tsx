@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 }
 
@@ -13,35 +13,35 @@ type AIChatProps = {
   endpoint?: string;
 };
 
-export function AIChat({ endpoint = '/api/chat' }: AIChatProps) {
+export function AIChat({ endpoint = "/api/chat" }: AIChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-scroll when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setInput('');
+    setInput("");
 
     const newMessages: Message[] = [
       ...messages,
-      { role: 'user', content: userMessage },
+      { role: "user", content: userMessage },
     ];
     setMessages(newMessages);
     setIsLoading(true);
 
     try {
       const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMessage,
           conversationHistory: newMessages,
@@ -49,24 +49,31 @@ export function AIChat({ endpoint = '/api/chat' }: AIChatProps) {
       });
 
       if (!res.ok) {
-        throw new Error('Request failed');
+        throw new Error("Request failed");
       }
 
       const data = await res.json();
+      console.log("API /api/chat returned:", data);
+      const assistantText =
+        data?.answer ??
+        data?.response ??
+        data?.reply ??
+        data?.content ??
+        (typeof data === "string" ? data : "");
 
       setMessages([
         ...newMessages,
         {
-          role: 'assistant',
-          content: data.response ?? 'No response received.',
+          role: "assistant",
+          content: assistantText || "No response received.",
         },
       ]);
     } catch (err) {
-      console.error('Chat error:', err);
+      console.error("Chat error:", err);
       setMessages([
         ...newMessages,
         {
-          role: 'assistant',
+          role: "assistant",
           content:
             "Sorry, something went wrong on my end. Mind trying that again in a bit?",
         },
@@ -77,7 +84,7 @@ export function AIChat({ endpoint = '/api/chat' }: AIChatProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       sendMessage();
     }
@@ -114,7 +121,7 @@ export function AIChat({ endpoint = '/api/chat' }: AIChatProps) {
                   Ask my portfolio anything
                 </h3>
                 <p className="text-xs text-neutral-300">
-                  Projects, process, tools, background.
+                  Projects, tools, background, hobbies
                 </p>
               </div>
               <button
@@ -132,13 +139,11 @@ export function AIChat({ endpoint = '/api/chat' }: AIChatProps) {
               {messages.length === 0 && (
                 <div className="text-center text-neutral-500 text-xs mt-6 px-3">
                   <p>
-                    Try things like:{' '}
+                    Try things like:{" "}
+                    <span className="font-medium">“Projects by Manthan”</span>{" "}
+                    or{" "}
                     <span className="font-medium">
-                      “How do you run usability tests?”
-                    </span>{' '}
-                    or{' '}
-                    <span className="font-medium">
-                      “Tell me about your favourite case study.”
+                      “Work experiece of Manthan”
                     </span>
                   </p>
                 </div>
@@ -148,14 +153,14 @@ export function AIChat({ endpoint = '/api/chat' }: AIChatProps) {
                 <div
                   key={i}
                   className={`flex ${
-                    msg.role === 'user' ? 'justify-end' : 'justify-start'
+                    msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-2 text-xs leading-relaxed ${
-                      msg.role === 'user'
-                        ? 'bg-black text-white'
-                        : 'bg-white text-black border border-neutral-200'
+                      msg.role === "user"
+                        ? "bg-black text-white"
+                        : "bg-white text-black border border-neutral-200"
                     }`}
                   >
                     {msg.content}
